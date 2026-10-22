@@ -1,7 +1,3 @@
-Paste this into your GitHub `README.md`:
-
-# Sticky Wall
-
 A simple Python desktop application for organizing ideas and tasks on a virtual sticky-note board.
 
 Create notes, drag them around the wall, edit their text, and choose colors. Notes save automatically on your computer and return when you reopen the app.
