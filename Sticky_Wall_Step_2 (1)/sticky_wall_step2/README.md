@@ -1,98 +1,133 @@
-# Sticky Wall — Step 2
+Paste this into your GitHub `README.md`:
 
-A small Python desktop app: create, drag, edit, delete, choose colors, and automatically save sticky notes. This is a deliberately small learning project. It uses Tkinter and JSON from Python's standard library, without third-party runtime packages.
+# Sticky Wall
 
-## Run on Windows
+A simple Python desktop application for organizing ideas and tasks on a virtual sticky-note board.
 
-Extract the ZIP, open this folder in VS Code, open a terminal, and run:
+Create notes, drag them around the wall, edit their text, and choose colors. Notes save automatically on your computer and return when you reopen the app.
 
-```text
+## Features
+
+- Create notes with multiline text.
+- Drag notes around the board.
+- Edit notes by double-clicking them.
+- Delete notes with confirmation.
+- Choose yellow, green, blue, or pink.
+- Automatically save note text, colors, and positions.
+
+## Getting Started
+
+This version runs from Python source. **A standalone Windows executable is not included yet.**
+
+You need Python 3 with Tkinter installed. No additional third-party Python packages are required.
+
+1. Select **Code → Download ZIP** on this repository.
+2. Extract the downloaded folder.
+3. Open a terminal in the folder containing `sticky_wall.py`.
+4. Run:
+
+```bash
 py sticky_wall.py
 ```
 
-Use `python sticky_wall.py` if that is the command your Python installation provides. This remains a source-code version that requires Python; it is not an executable or installer yet.
+If your installation uses the `python` command instead:
 
-## Controls
+```bash
+python sticky_wall.py
+```
 
-- **New note:** enter text, then select Save note (or press Ctrl+Enter). Cancel discards the dialog's changes.
-- **Select:** click a note. Its border indicates selection.
-- **Move:** drag a note; its position saves when you release the mouse.
-- **Edit:** double-click a note, or select it and press Edit. The editor supports multiple lines and opens the full text even when the wall shows a shortened preview.
-- **Delete:** select a note, press Delete, then confirm.
-- **Color:** select a note, then press Yellow, Green, Blue, or Pink.
-- **Save:** creation, editing, deletion, colors, and released drags save automatically. Closing the app also saves.
+## How to Use
 
-Notes are stored in `%LOCALAPPDATA%\StickyWall\notes.json`. Paste that folder path into Windows File Explorer to inspect or back up your file. Only open one copy of the app at a time; separate instances do not synchronize.
+| Action | Instructions |
+| --- | --- |
+| Create a note | Click **+ New note**, enter text, then click **Save note**. |
+| Save from the editor | Click **Save note** or press **Ctrl+Enter**. |
+| Move a note | Click and hold a note, then drag it. |
+| Edit a note | Double-click it, or select it and click **Edit**. |
+| Change its color | Select a note and click a color button. |
+| Delete a note | Select it, click **Delete**, and confirm. |
+| Cancel editing | Click **Cancel** or press **Esc**. |
 
-Step 1 did not save notes, so it has no saved notes to import. Unreadable existing saves are protected: the app shows an error and disables saving instead of overwriting them. Keep a backup, repair or rename the file, then restart. Save errors are shown to you rather than reported as successful.
+Long notes show a shortened preview on the board. Open the editor to read or edit the full text.
 
-## Understand the new code in five small steps
+## How the Code Works
 
-### 1. The dictionary is the app's data
+The application uses Python’s standard library:
+
+- **Tkinter** creates the window, buttons, editor, and canvas.
+- **Dictionaries** store each note’s text, position, and color.
+- **Functions** handle actions such as creating, editing, deleting, and saving.
+- **Mouse events** track clicks and dragging.
+- **JSON** stores notes between sessions.
+- **pathlib** and **os** manage the save location.
+
+Each note has a unique ID and a dictionary resembling this:
 
 ```python
-notes = {
-    'note_1': {'text': 'Practice Python', 'x': 40, 'y': 40, 'color': '#FBE59A'}
+{
+    "text": "Practice Python",
+    "x": 40,
+    "y": 40,
+    "color": "#FBE59A"
 }
 ```
 
-The outer key identifies a note. The inner dictionary stores its text, position, and color. Tkinter draws a picture of this data; the dictionary is what gets saved.
+Most actions follow the same process:
 
-### 2. Selecting tells buttons which note to change
+1. Update the note’s dictionary.
+2. Update its appearance on the canvas.
+3. Save the updated data.
 
-`selected` holds a tag such as `note_1`, or `None`. `select_note()` sets it, draws a border, and enables the edit/delete/color buttons. A shared canvas tag ties each note's rectangle, shadow, and text together.
+The application writes a temporary file before replacing the existing save. If a saved file cannot be read, it displays an error and disables saving to avoid overwriting that file.
 
-### 3. Editing and colors follow the same pattern
+## Where Notes Are Saved
 
-Change the dictionary, redraw the note, then save.
+On Windows, notes are stored at:
 
-```python
-notes[selected]['color'] = color
-draw_note(selected)
-save_notes()
+```text
+%LOCALAPPDATA%\StickyWall\notes.json
 ```
 
-`open_editor()` creates a separate window with a Text box. Its inner function, `apply_changes()`, can access that editor's text box. This is a nested function: it keeps the small dialog's actions together. New notes get a unique numbered ID; edits keep their ID.
+Paste `%LOCALAPPDATA%\StickyWall` into File Explorer’s address bar to find the folder.
 
-The color buttons use `lambda chosen=color: change_color(chosen)`. The default argument remembers each button's own color when that button is created. Without that detail, the loop's buttons could all use its last color.
+Notes stay on your computer. The application makes no network requests and does not upload notes to GitHub. The save file is readable JSON and is **not encrypted**.
 
-### 4. Deleting removes both data and drawing
+Only open one instance of the app at a time. Multiple instances do not synchronize and could overwrite each other’s changes.
 
-After confirmation, `wall.delete(tag)` removes the drawing and `del notes[tag]` removes the dictionary entry. Then the app saves. There is no delete undo in this version.
+## How This Project Was Created
 
-### 5. JSON keeps data after the program ends
+I developed this project as a beginner computer science student learning how to turn Python coursework into a desktop application.
 
-`json.dumps()` converts the dictionary into text. `json.loads()` converts saved text back into a dictionary. `Path` helps work with files and folders.
+I chose the app’s features and worked through development in stages, starting with draggable notes and then adding editing, deletion, colors, and saving.
 
-`write_notes()` writes a temporary file first and replaces the main save only after writing succeeds. That avoids clearing the old save before the new one is ready. `read_notes()` checks the data before using it. `try/except` catches file or data errors so the app can show a useful message.
+**This project was built with substantial assistance from ChatGPT/Codex**, including generated code, explanations, debugging, and automated storage tests. My role included defining the requirements, running the application on Windows, and reporting problems during development.
 
-The editor and display never execute saved text as Python code.
+For example, testing revealed that the editor’s Save button could be hidden below the text box. The layout was revised to reserve space for the buttons, and a Ctrl+Enter shortcut was added.
 
-## Test it on your Windows computer
+This is an ongoing learning project. I am working through the code to understand its functions, data structures, and event handling. It is not presented as entirely independently written software.
 
-1. Create two notes, including one with multiple lines and accented characters.
-2. Edit one, then reopen it and confirm the full text is present.
-3. Try all four colors, and drag a note near the edge.
-4. Close and reopen the app: text, positions, and colors should remain.
-5. Cancel a deletion and confirm the note remains. Confirm deletion, restart, and confirm it is gone.
-6. Resize the window smaller: notes should stay reachable.
+## Testing
 
-The included storage tests passed in the development environment. Windows GUI testing is still a separate check. Run the storage tests with `py -m unittest test_storage.py`.
+Run the included storage tests with:
 
-## Explain it in an interview
+```bash
+py -m unittest test_storage.py
+```
 
-Use this explanation once you can explain the corresponding functions yourself:
+The tests check:
 
-“I built a small Python sticky-note board using Tkinter. Each note is a dictionary with text, position, and color. Mouse events handle dragging, and buttons update the selected note. I serialize the notes to JSON so they survive restarting. I used AI assistance and reviewed and tested the code as I learned.”
+- Saving and loading note data, including multiline and accented text.
+- Saving an empty board after deleting notes.
+- Rejecting invalid saved data without modifying the original file.
 
-Be specific about which parts you wrote, adapted, and learned with assistance. This project does not claim a database, cloud service, AI product feature, or production deployment.
+These tests cover file storage, not every graphical interaction. To check the interface, create a note, edit it, change its color, move it, and restart the app to confirm your changes remain.
 
-## A good stopping point
+## Current Limitations
 
-This version contains only the features requested for today. Connections, search, completion tracking, GitHub publication, and Windows executable packaging are deferred. There are no due dates or reminders.
+- Requires Python to run; no packaged `.exe` yet.
+- No search, linked notes, completion tracking, or reminders.
+- No cloud synchronization.
+- Deletion has a confirmation prompt but no undo.
+- Intended for one running instance at a time.
 
-Practice task: add a fifth color to COLORS and predict why a new button appears without writing another button creation block.
-
-## Editor layout fix
-
-The editor now uses three grid rows: label, text, and action buttons. Only the text row expands. This keeps Save note and Cancel visible in the editor. Ctrl+Enter also saves.
+The project is intentionally small so I can understand and explain its behavior before adding more features.
